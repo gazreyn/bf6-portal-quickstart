@@ -1,0 +1,416 @@
+{
+	"OnAIMoveToFailed": {
+		"prefix": "OnAIMoveToFailed",
+		"body": [
+			"export function OnAIMoveToFailed(eventPlayer: mod.Player): void {",
+			"\t$0",
+			"}"
+		],
+		"description": "Called when AI movement to a target fails"
+	},
+	"OnAIMoveToRunning": {
+		"prefix": "OnAIMoveToRunning",
+		"body": [
+			"export function OnAIMoveToRunning(eventPlayer: mod.Player): void {",
+			"\t$0",
+			"}"
+		],
+		"description": "Called when AI movement to a target is running"
+	},
+	"OnAIMoveToSucceeded": {
+		"prefix": "OnAIMoveToSucceeded",
+		"body": [
+			"export function OnAIMoveToSucceeded(eventPlayer: mod.Player): void {",
+			"\t$0",
+			"}"
+		],
+		"description": "Called when AI movement to a target succeeds"
+	},
+	"OnAIParachuteRunning": {
+		"prefix": "OnAIParachuteRunning",
+		"body": [
+			"export function OnAIParachuteRunning(eventPlayer: mod.Player): void {",
+			"\t$0",
+			"}"
+		],
+		"description": "Called when AI parachute is running"
+	},
+	"OnAIParachuteSucceeded": {
+		"prefix": "OnAIParachuteSucceeded",
+		"body": [
+			"export function OnAIParachuteSucceeded(eventPlayer: mod.Player): void {",
+			"\t$0",
+			"}"
+		],
+		"description": "Called when AI parachute succeeds"
+	},
+	"OnAIWaypointIdleFailed": {
+		"prefix": "OnAIWaypointIdleFailed",
+		"body": [
+			"export function OnAIWaypointIdleFailed(eventPlayer: mod.Player): void {",
+			"\t$0",
+			"}"
+		],
+		"description": "Called when AI waypoint idle fails"
+	},
+	"OnAIWaypointIdleRunning": {
+		"prefix": "OnAIWaypointIdleRunning",
+		"body": [
+			"export function OnAIWaypointIdleRunning(eventPlayer: mod.Player): void {",
+			"\t$0",
+			"}"
+		],
+		"description": "Called when AI waypoint idle is running"
+	},
+	"OnAIWaypointIdleSucceeded": {
+		"prefix": "OnAIWaypointIdleSucceeded",
+		"body": [
+			"export function OnAIWaypointIdleSucceeded(eventPlayer: mod.Player): void {",
+			"\t$0",
+			"}"
+		],
+		"description": "Called when AI waypoint idle succeeds"
+	},
+	"OnCapturePointCaptured": {
+		"prefix": "OnCapturePointCaptured",
+		"body": [
+			"export function OnCapturePointCaptured(eventCapturePoint: mod.CapturePoint): void {",
+			"\t$0",
+			"}"
+		],
+		"description": "Called when a capture point is captured"
+	},
+	"OnCapturePointCapturing": {
+		"prefix": "OnCapturePointCapturing",
+		"body": [
+			"export function OnCapturePointCapturing(eventCapturePoint: mod.CapturePoint): void {",
+			"\t$0",
+			"}"
+		],
+		"description": "Called when a capture point is being captured"
+	},
+	"OnCapturePointLost": {
+		"prefix": "OnCapturePointLost",
+		"body": [
+			"export function OnCapturePointLost(eventCapturePoint: mod.CapturePoint): void {",
+			"\t$0",
+			"}"
+		],
+		"description": "Called when a capture point is lost"
+	},
+	"OnGameModeEnding": {
+		"prefix": "OnGameModeEnding",
+		"body": [
+			"export function OnGameModeEnding(): void {",
+			"\t$0",
+			"}"
+		],
+		"description": "Called when the game mode is ending"
+	},
+	"OnGameModeStarted": {
+		"prefix": "OnGameModeStarted",
+		"body": [
+			"export function OnGameModeStarted(): void {",
+			"\t$0",
+			"}"
+		],
+		"description": "Called when the game mode starts"
+	},
+	"OnMandown": {
+		"prefix": "OnMandown",
+		"body": [
+			"export function OnMandown(eventPlayer: mod.Player, eventOtherPlayer: mod.Player): void {",
+			"\t$0",
+			"}"
+		],
+		"description": "Called when a player goes down (mandown)"
+	},
+	"OnMCOMArmed": {
+		"prefix": "OnMCOMArmed",
+		"body": [
+			"export function OnMCOMArmed(eventMCOM: mod.MCOM): void {",
+			"\t$0",
+			"}"
+		],
+		"description": "Called when an MCOM is armed"
+	},
+	"OnMCOMDefused": {
+		"prefix": "OnMCOMDefused",
+		"body": [
+			"export function OnMCOMDefused(eventMCOM: mod.MCOM): void {",
+			"\t$0",
+			"}"
+		],
+		"description": "Called when an MCOM is defused"
+	},
+	"OnMCOMDestroyed": {
+		"prefix": "OnMCOMDestroyed",
+		"body": [
+			"export function OnMCOMDestroyed(eventMCOM: mod.MCOM): void {",
+			"\t$0",
+			"}"
+		],
+		"description": "Called when an MCOM is destroyed"
+	},
+	"OnPlayerDamaged": {
+		"prefix": "OnPlayerDamaged",
+		"body": [
+			"export function OnPlayerDamaged(",
+			"\teventPlayer: mod.Player,",
+			"\teventOtherPlayer: mod.Player,",
+			"\teventDamageType: mod.DamageType,",
+			"\teventWeaponUnlock: mod.WeaponUnlock",
+			"): void {",
+			"\t$0",
+			"}"
+		],
+		"description": "Called when a player takes damage"
+	},
+	"OnPlayerDeployed": {
+		"prefix": "OnPlayerDeployed",
+		"body": [
+			"export function OnPlayerDeployed(eventPlayer: mod.Player): void {",
+			"\t$0",
+			"}"
+		],
+		"description": "Called when a player is deployed"
+	},
+	"OnPlayerDied": {
+		"prefix": "OnPlayerDied",
+		"body": [
+			"export function OnPlayerDied(",
+			"\teventPlayer: mod.Player,",
+			"\teventOtherPlayer: mod.Player,",
+			"\teventDeathType: mod.DeathType,",
+			"\teventWeaponUnlock: mod.WeaponUnlock",
+			"): void {",
+			"\t$0",
+			"}"
+		],
+		"description": "Called when a player dies"
+	},
+	"OnPlayerEarnedKill": {
+		"prefix": "OnPlayerEarnedKill",
+		"body": [
+			"export function OnPlayerEarnedKill(",
+			"\teventPlayer: mod.Player,",
+			"\teventOtherPlayer: mod.Player,",
+			"\teventDeathType: mod.DeathType,",
+			"\teventWeaponUnlock: mod.WeaponUnlock",
+			"): void {",
+			"\t$0",
+			"}"
+		],
+		"description": "Called when a player earns a kill"
+	},
+	"OnPlayerEarnedKillAssist": {
+		"prefix": "OnPlayerEarnedKillAssist",
+		"body": [
+			"export function OnPlayerEarnedKillAssist(eventPlayer: mod.Player, eventOtherPlayer: mod.Player): void {",
+			"\t$0",
+			"}"
+		],
+		"description": "Called when a player earns a kill assist"
+	},
+	"OnPlayerEnterAreaTrigger": {
+		"prefix": "OnPlayerEnterAreaTrigger",
+		"body": [
+			"export function OnPlayerEnterAreaTrigger(eventPlayer: mod.Player, eventAreaTrigger: mod.AreaTrigger): void {",
+			"\t$0",
+			"}"
+		],
+		"description": "Called when a player enters an area trigger"
+	},
+	"OnPlayerEnterCapturePoint": {
+		"prefix": "OnPlayerEnterCapturePoint",
+		"body": [
+			"export function OnPlayerEnterCapturePoint(eventPlayer: mod.Player, eventCapturePoint: mod.CapturePoint): void {",
+			"\t$0",
+			"}"
+		],
+		"description": "Called when a player enters a capture point"
+	},
+	"OnPlayerEnterVehicle": {
+		"prefix": "OnPlayerEnterVehicle",
+		"body": [
+			"export function OnPlayerEnterVehicle(eventPlayer: mod.Player, eventVehicle: mod.Vehicle): void {",
+			"\t$0",
+			"}"
+		],
+		"description": "Called when a player enters a vehicle"
+	},
+	"OnPlayerEnterVehicleSeat": {
+		"prefix": "OnPlayerEnterVehicleSeat",
+		"body": [
+			"export function OnPlayerEnterVehicleSeat(",
+			"\teventPlayer: mod.Player,",
+			"\teventVehicle: mod.Vehicle,",
+			"\teventSeat: number",
+			"): void {",
+			"\t$0",
+			"}"
+		],
+		"description": "Called when a player enters a specific vehicle seat"
+	},
+	"OnPlayerExitAreaTrigger": {
+		"prefix": "OnPlayerExitAreaTrigger",
+		"body": [
+			"export function OnPlayerExitAreaTrigger(eventPlayer: mod.Player, eventAreaTrigger: mod.AreaTrigger): void {",
+			"\t$0",
+			"}"
+		],
+		"description": "Called when a player exits an area trigger"
+	},
+	"OnPlayerExitCapturePoint": {
+		"prefix": "OnPlayerExitCapturePoint",
+		"body": [
+			"export function OnPlayerExitCapturePoint(eventPlayer: mod.Player, eventCapturePoint: mod.CapturePoint): void {",
+			"\t$0",
+			"}"
+		],
+		"description": "Called when a player exits a capture point"
+	},
+	"OnPlayerExitVehicle": {
+		"prefix": "OnPlayerExitVehicle",
+		"body": [
+			"export function OnPlayerExitVehicle(eventPlayer: mod.Player, eventVehicle: mod.Vehicle): void {",
+			"\t$0",
+			"}"
+		],
+		"description": "Called when a player exits a vehicle"
+	},
+	"OnPlayerExitVehicleSeat": {
+		"prefix": "OnPlayerExitVehicleSeat",
+		"body": [
+			"export function OnPlayerExitVehicleSeat(",
+			"\teventPlayer: mod.Player,",
+			"\teventVehicle: mod.Vehicle,",
+			"\teventSeat: number",
+			"): void {",
+			"\t$0",
+			"}"
+		],
+		"description": "Called when a player exits a specific vehicle seat"
+	},
+	"OnPlayerInteract": {
+		"prefix": "OnPlayerInteract",
+		"body": [
+			"export function OnPlayerInteract(eventPlayer: mod.Player, eventInteractPoint: mod.InteractPoint): void {",
+			"\t$0",
+			"}"
+		],
+		"description": "Called when a player interacts with an object"
+	},
+	"OnPlayerJoinGame": {
+		"prefix": "OnPlayerJoinGame",
+		"body": [
+			"export function OnPlayerJoinGame(eventPlayer: mod.Player): void {",
+			"\t$0",
+			"}"
+		],
+		"description": "Called when a player joins the game"
+	},
+	"OnPlayerLeaveGame": {
+		"prefix": "OnPlayerLeaveGame",
+		"body": [
+			"export function OnPlayerLeaveGame(eventNumber: number): void {",
+			"\t$0",
+			"}"
+		],
+		"description": "Called when a player leaves the game"
+	},
+	"OnPlayerSwitchTeam": {
+		"prefix": "OnPlayerSwitchTeam",
+		"body": [
+			"export function OnPlayerSwitchTeam(eventPlayer: mod.Player, eventTeam: mod.Team): void {",
+			"\t$0",
+			"}"
+		],
+		"description": "Called when a player switches teams"
+	},
+	"OnPlayerUIButtonEvent": {
+		"prefix": "OnPlayerUIButtonEvent",
+		"body": [
+			"export function OnPlayerUIButtonEvent(",
+			"\teventPlayer: mod.Player,",
+			"\teventUIWidget: mod.UIWidget,",
+			"\teventUIButtonEvent: mod.UIButtonEvent",
+			"): void {",
+			"\t$0",
+			"}"
+		],
+		"description": "Called when a UI button event occurs"
+	},
+	"OnPlayerUndeploy": {
+		"prefix": "OnPlayerUndeploy",
+		"body": [
+			"export function OnPlayerUndeploy(eventPlayer: mod.Player): void {",
+			"\t$0",
+			"}"
+		],
+		"description": "Called when a player undeploys"
+	},
+	"OnRayCastHit": {
+		"prefix": "OnRayCastHit",
+		"body": [
+			"export function OnRayCastHit(eventPlayer: mod.Player, eventPoint: mod.Vector, eventNormal: mod.Vector): void {",
+			"\t$0",
+			"}"
+		],
+		"description": "Called when a raycast hits something"
+	},
+	"OnRayCastMissed": {
+		"prefix": "OnRayCastMissed",
+		"body": [
+			"export function OnRayCastMissed(eventPlayer: mod.Player): void {",
+			"\t$0",
+			"}"
+		],
+		"description": "Called when a raycast misses"
+	},
+	"OnRevived": {
+		"prefix": "OnRevived",
+		"body": [
+			"export function OnRevived(eventPlayer: mod.Player, eventOtherPlayer: mod.Player): void {",
+			"\t$0",
+			"}"
+		],
+		"description": "Called when a player is revived"
+	},
+	"OnSpawnerSpawned": {
+		"prefix": "OnSpawnerSpawned",
+		"body": [
+			"export function OnSpawnerSpawned(eventPlayer: mod.Player, eventSpawner: mod.Spawner): void {",
+			"\t$0",
+			"}"
+		],
+		"description": "Called when a spawner spawns a player"
+	},
+	"OnTimeLimitReached": {
+		"prefix": "OnTimeLimitReached",
+		"body": [
+			"export function OnTimeLimitReached(): void {",
+			"\t$0",
+			"}"
+		],
+		"description": "Called when the time limit is reached"
+	},
+	"OnVehicleDestroyed": {
+		"prefix": "OnVehicleDestroyed",
+		"body": [
+			"export function OnVehicleDestroyed(eventVehicle: mod.Vehicle): void {",
+			"\t$0",
+			"}"
+		],
+		"description": "Called when a vehicle is destroyed"
+	},
+	"OnVehicleSpawned": {
+		"prefix": "OnVehicleSpawned",
+		"body": [
+			"export function OnVehicleSpawned(eventVehicle: mod.Vehicle): void {",
+			"\t$0",
+			"}"
+		],
+		"description": "Called when a vehicle is spawned"
+	}
+}
