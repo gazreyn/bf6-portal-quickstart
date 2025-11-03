@@ -11,10 +11,10 @@
     "verbatimModuleSyntax": true,
     "skipLibCheck": true,
     "paths": {
-        "modlib": ["./lib/modlib"]
+        "modlib": ["./sdk/modlib"]
     },
     "types": [
-            "./types/mod",
+            "./sdk/mod",
             "node"
     ],
   },
