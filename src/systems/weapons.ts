@@ -1,5 +1,12 @@
 import { s } from "../lib/string-macro";
 
+export type WeaponDefinition = {
+    id: string;
+    weapon: mod.Weapons;
+    name: string;
+    category: WeaponCategory;
+};
+
 export const weaponCategories = ['assault', 'carbine', 'sniper', 'smg', 'lmg', 'shotgun', 'pistol', 'dmr'] as const;
 export type WeaponCategory = typeof weaponCategories[number];
 
