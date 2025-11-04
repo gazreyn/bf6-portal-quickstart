@@ -1,5 +1,5 @@
 type Size = { width: number; height: number };
-export type StackItem = { id?: string; size: Size };
+export type StackItem<T = string> = { id?: T; size: Size };
 type SlackAlign = "start" | "center" | "end" | "stretch";
 
 type StackLayoutOptions = {
@@ -12,13 +12,12 @@ type StackLayoutOptions = {
   containerWidth?: number | "auto";       // authoritative when direction=horizontal
   containerHeight?: number | "auto";      // authoritative when direction=vertical
   roundPixels?: boolean;                  // default true
-  idPrefix?: string;                      // NEW: prefix for auto-generated IDs
 };
 
-export type StackFrame = { id?: string; x: number; y: number; width: number; height: number };
-type StackLayoutResult = { container: Size; frames: StackFrame[] };
+export type StackFrame<T = string> = { id?: T; x: number; y: number; width: number; height: number };
+type StackLayoutResult<T = string> = { container: Size; frames: StackFrame<T>[] };
 
-export function stackLayout(items: StackItem[], opts: StackLayoutOptions = {}): StackLayoutResult {
+export function stackLayout<T = string>(items: StackItem<T>[], opts: StackLayoutOptions = {}): StackLayoutResult<T> {
   const {
     direction = "vertical",
     gap = 0,
@@ -29,11 +28,9 @@ export function stackLayout(items: StackItem[], opts: StackLayoutOptions = {}): 
     containerWidth = "auto",
     containerHeight = "auto",
     roundPixels = true,
-    idPrefix = "item-", // NEW: default prefix
   } = opts;
 
-  // NEW: normalize IDs up front
-  const norm = items.map((it, i) => ({ ...it, id: it.id ?? `${idPrefix}${i}` }));
+  const norm = items;
 
   const pad = typeof padding === "number"
     ? { top: padding, right: padding, bottom: padding, left: padding }
@@ -104,7 +101,7 @@ export function stackLayout(items: StackItem[], opts: StackLayoutOptions = {}): 
 
   const px = (n: number) => (roundPixels ? Math.round(n) : n);
 
-  const frames: StackFrame[] = new Array(norm.length);
+  const frames: StackFrame<T>[] = new Array(norm.length);
   let crossLineOffset = padCrossStart;
 
   for (const line of lines) {
@@ -158,7 +155,6 @@ export function stackLayout(items: StackItem[], opts: StackLayoutOptions = {}): 
 //   crossGap: 8,
 //   padding: 0,
 //   align: "start",
-//   idPrefix: "category_"
 // });
 
 // console.log(res);
