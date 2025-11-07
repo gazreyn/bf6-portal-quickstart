@@ -1,5 +1,9 @@
 type Size = { width: number; height: number };
-export type StackItem<T = string> = { id?: T; size: Size };
+export type StackItem<T = string> = {
+  id?: T;
+  size: Size;
+  grow?: number; // proportional share of leftover space along the main axis
+};
 type SlackAlign = "start" | "center" | "end" | "stretch";
 
 type StackLayoutOptions = {
@@ -15,7 +19,7 @@ type StackLayoutOptions = {
 };
 
 export type StackFrame<T = string> = { id?: T; x: number; y: number; width: number; height: number };
-type StackLayoutResult<T = string> = { container: Size; frames: StackFrame<T>[] };
+type StackLayoutResult<T = string> = { container: Size; frames: StackFrame<T>[]; maxItemsFit: number };
 
 export function stackLayout<T = string>(items: StackItem<T>[], opts: StackLayoutOptions = {}): StackLayoutResult<T> {
   const {
@@ -103,19 +107,26 @@ export function stackLayout<T = string>(items: StackItem<T>[], opts: StackLayout
 
   const frames: StackFrame<T>[] = new Array(norm.length);
   let crossLineOffset = padCrossStart;
+  const constrainedMain = Number.isFinite(contentMaxMain) ? contentMaxMain : undefined;
 
   for (const line of lines) {
     const lineCross = line.cross;
+    const lineGrowTotal = line.items.reduce((sum, { idx }) => sum + (norm[idx].grow ?? 0), 0);
+    const extraMain = lineGrowTotal > 0 && constrainedMain != null
+      ? Math.max(0, constrainedMain - line.main)
+      : 0;
     let cursor = padMainStart;
 
     for (const { idx, size } of line.items) {
-      const itemMain = getMain(size);
+      const item = norm[idx];
+      const growShare = lineGrowTotal > 0 ? (item.grow ?? 0) / lineGrowTotal : 0;
+      const itemMain = getMain(size) + extraMain * growShare;
       const itemCross = getCross(size);
 
       const crossSpace = Math.max(0, lineCross - itemCross);
       let crossOffset = 0;
-      let w = size.width;
-      let h = size.height;
+      let w = isVert ? itemCross : itemMain;
+      let h = isVert ? itemMain : itemCross;
 
       if (align === "center") crossOffset = crossSpace / 2;
       else if (align === "end") crossOffset = crossSpace;
@@ -131,30 +142,35 @@ export function stackLayout<T = string>(items: StackItem<T>[], opts: StackLayout
       const x = isVert ? px(crossPos) : px(mainPos);
       const y = isVert ? px(mainPos) : px(crossPos);
 
-      frames[idx] = { id: norm[idx].id, x, y, width: px(w), height: px(h) };
+  frames[idx] = { id: item.id, x, y, width: px(w), height: px(h) };
       cursor += itemMain + gap;
     }
 
     crossLineOffset += lineCross + crossGap;
   }
 
+  const containerWidthPx = px(finalWidth);
+  const containerHeightPx = px(finalHeight);
+  const eps = 1e-6;
+  let maxItemsFit = 0;
+
+  for (let i = 0; i < frames.length; i++) {
+    const frame = frames[i];
+    if (!frame) break;
+
+    const fits =
+      frame.x >= -eps &&
+      frame.y >= -eps &&
+      frame.x + frame.width <= containerWidthPx + eps &&
+      frame.y + frame.height <= containerHeightPx + eps;
+
+    if (!fits) break;
+    maxItemsFit = i + 1;
+  }
+
   return {
-    container: { width: px(finalWidth), height: px(finalHeight) },
+    container: { width: containerWidthPx, height: containerHeightPx },
     frames,
+    maxItemsFit,
   };
 }
-
-// const items: StackItem[] = Array.from({ length: 10 }, (_value, index) => ({ size: { width: 240, height: 65 } }));
-
-// const res = stackLayout(items, {
-//   containerWidth: 900,
-//   containerHeight: 600,
-//   direction: "horizontal",
-//   wrap: "wrap",
-//   gap: 8,
-//   crossGap: 8,
-//   padding: 0,
-//   align: "start",
-// });
-
-// console.log(res);
