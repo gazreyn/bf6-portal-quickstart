@@ -5,8 +5,11 @@ import { weaponCategories, weaponCategoryLabels, type WeaponCategory, type Weapo
 import { COLOR } from "../../lib/colors";
 import { parseCloseButton, parseNavButtonCategory, CatalogWidgetName, LAYOUT, parseWeaponWidgetName } from "./utils";
 import { s } from "../../lib/string-macro";
+import { MainHeader } from "./main-header";
 
 const DEBUG_LAYOUT = false;
+
+let SHOULD_SHOW_BACK_BUTTON = false;
 
 const DEBUG_BG = (color: [number, number, number] = [1, 0, 0]) => {
     return DEBUG_LAYOUT ? {
@@ -44,20 +47,20 @@ export class WeaponCatalog {
     private _catalogRootWidget: mod.UIWidget | undefined;
     // private _navigationHeaderTextWidget: mod.UIWidget | undefined;
     private _navigationButtons: Partial<Record<WeaponCategory, NavButton>> = {};
-    private _mainHeader: Partial<{ container: mod.UIWidget; text: mod.UIWidget }> = {};
+    // private _mainHeader: Partial<{ container: mod.UIWidget; text: mod.UIWidget }> = {};
+    private _mainHeader: MainHeader | undefined;
     private _mainPageContentContainer: mod.UIWidget | undefined;
 
     // Weapon Buttons
     private _weaponButtons: Partial<Record<string, WeaponButton>> = {};
 
     // State
+    private _currentView: "weaponList" | "attachmentSlots" | "attachments" = "weaponList";
     private _selectedCategory: WeaponCategory = "assault";
 
     constructor(playerState: PlayerState) {
         this._playerState = playerState;
-
         this._createCatalogUI();
-
         this.selectCategory("assault"); // Default selected category
     }
 
@@ -275,46 +278,62 @@ export class WeaponCatalog {
 
         if (!mainWrapper) return; // Was unable to create nav menu wrapper?
 
-        // Create the navigation menu header - Consider moving this to its own function
-        const mainHeader = ParseUI({
+        // Create the navigation menu header
+        this._mainHeader = new MainHeader(mainWrapper, "weaponList");
+
+        // TODO: Might want to store this on a class variable for later use
+        const mainContentContainer = this._createMainContentArea(mainWrapper);
+
+        if(!mainContentContainer) return;
+
+        this._createWeaponCategoryViews(mainContentContainer);
+    }
+
+    private _createMainContentArea(parent: mod.UIWidget) {
+        return ParseUI({
             type: "Container",
-            name: CatalogWidgetName.mainHeader(),
-            parent: mainWrapper,
-            size: [MAIN_WIDTH, MAIN_HEADER_HEIGHT],
+            name: CatalogWidgetName.mainContentContainer(),
+            parent: parent,
+            anchor: mod.UIAnchor.TopCenter,
+            size: [LAYOUT.MAIN.CONTENT.WIDTH(), LAYOUT.MAIN.CONTENT.HEIGHT()],
+            position: [0, LAYOUT.MAIN.CONTENT.Y()],
+            ...DEBUG_BG([0, 1, 0]),
+        });
+        // this._mainPageContentContainer = mainContentInnerContainer;
+    }
+
+    private _createWeaponCategoryViews(parent: mod.UIWidget) {
+        weaponCategories.forEach((category) => {
+            this._createViewForWeaponCategory(parent, category);
+        });
+    }
+
+    private _createViewForWeaponCategory(parent: mod.UIWidget, category: WeaponCategory) {
+       // The below container is essentially the page. 
+        const viewContainer = ParseUI({
+            type: "Container",
+            name: CatalogWidgetName.mainContentInnerContainer(),
+            parent,
+            anchor: mod.UIAnchor.TopCenter,
+            size: [LAYOUT.MAIN.CONTENT.INNER_WIDTH(), LAYOUT.MAIN.CONTENT.INNER_HEIGHT()],
             position: [0, 0],
-            anchor: mod.UIAnchor.TopLeft,
-            ...DEBUG_BG([0, 0, 1]),
+            visible: category === "assault", // TEMP. Sort this out after
+            ...DEBUG_BG([0, 1, 0]),
         });
 
-        const mainHeaderText = ParseUI({
-            type: "Text",
-            name: CatalogWidgetName.mainHeaderText(),
-            parent: mainHeader,
-            size: [LAYOUT.MAIN.HEADER.INNER_WIDTH(), LAYOUT.MAIN.HEADER.INNER_HEIGHT()],
-            position: [0, 0],
-            padding: 0,
-            anchor: mod.UIAnchor.Center,
-            textAnchor: mod.UIAnchor.BottomLeft,
-            textLabel: s`WEAPON`,
-            ...DEBUG_BG([0, 0, 1]),
-        });
+        if(!viewContainer) return;
 
-        if (!mainHeader || !mainHeaderText) return;
+        // TODO: 1. Fetch weapons for this category
 
-        this._mainHeader = { container: mainHeader, text: mainHeaderText };
-
-        this._createMainContentArea(mainWrapper);
-
-        if(!this._mainPageContentContainer) return;
-
-        const weaponItems = Array.from({ length: 18 }, (): StackItem => {
+        // TODO: 2. Create an array of StackItems for the weapons in this category
+        const weaponItems = Array.from({ length: 40 }, (): StackItem => {
             return {
                 size: { width: 200, height: 200 },
             };
         });
 
-        // Calculate stack height and spacing
-        const horizontalLayout = stackLayout(weaponItems, {
+        // 3. Create the stack layout for the weapon items
+        const gridLayout = stackLayout(weaponItems, {
             direction: "horizontal",
             wrap: "wrap",
             roundPixels: true,
@@ -322,28 +341,33 @@ export class WeaponCatalog {
             crossGap: 16,
             containerHeight: LAYOUT.MAIN.CONTENT.INNER_HEIGHT(),
             containerWidth: LAYOUT.MAIN.CONTENT.INNER_WIDTH(),
-        });
+        });        
 
-        // TODO: Replace this with real weapons etc. 
+        // TODO: 4. Calculate if we need pagination controls by checking if weapons.length > horizontalLayout.maxItemsFit
+        // If so, create pagination buttons (Next, Previous) and logic to handle page changes.
 
-        const testWeapon: WeaponDefinition = {
-            id: "test_assault_rifle",
+        // TODO: 5. Create weapon buttons based on the layout frames
+
+        const fakeWeapons: WeaponDefinition[] = Array.from({ length: 40 }, (_, i) => ({
+            id: `test_weapon_${i + 1}`,
             weapon: mod.Weapons.AssaultRifle_B36A4,
             name: s`B36A4`,
-            category: "assault",
-        };
+            category: category,
+        }));
 
-        horizontalLayout.frames.forEach((frame, index) => {
-            this._createWeaponButton(this._mainPageContentContainer!, testWeapon, frame);
-        });
+        const itemCountPerPage = fakeWeapons.length > gridLayout.maxItemsFit ? gridLayout.maxItemsFit : fakeWeapons.length;
 
-        // this._createWeaponPages(this._mainPageContentContainer);
+        for(let i = 0; i < itemCountPerPage; i++) {
+            const weapon = fakeWeapons[i];
+            const frame = gridLayout.frames[i];
+            this._createWeaponButton(viewContainer, weapon, frame);
+        }
     }
 
     private _createWeaponButton(parent: mod.UIWidget, weapon: WeaponDefinition, stackFrame: StackFrame) {
         const weaponItemButtonContainer = ParseUI({
             type: "Container",
-            parent,
+            parent: parent,
             position: [stackFrame.x, stackFrame.y],
             size: [stackFrame.width, stackFrame.height],
             anchor: mod.UIAnchor.TopLeft,
@@ -363,11 +387,11 @@ export class WeaponCatalog {
             bgFill: mod.UIBgFill.GradientBottom,
             bgColor: [1, 1, 1],
             bgAlpha: 1,
-            buttonColorBase: COLOR.vector("neutral-950"),
+            buttonColorBase: COLOR.vector("neutral-900"),
             buttonAlphaBase: 1,
-            buttonColorHover: COLOR.vector("sky-800"),
+            buttonColorHover: COLOR.vector("sky-900"),
             buttonAlphaHover: 1,
-            buttonColorFocused: COLOR.vector("neutral-900"),
+            buttonColorFocused: COLOR.vector("neutral-800"),
             buttonAlphaFocused: 1,
         });
 
@@ -402,34 +426,6 @@ export class WeaponCatalog {
         if(!weaponItemButton || !weaponItemButtonBorder || !weaponItemButtonText) return;
 
         this._weaponButtons[weapon.id] = { id: weapon.id, container: weaponItemButtonContainer, button: weaponItemButton, border: weaponItemButtonBorder, label: weaponItemButtonText };
-    }
-
-    private _createWeaponPages(parent: mod.UIWidget) {
-       // TODO: Implement weapon page creation logic
-    }
-
-    private _createMainContentArea(parent: mod.UIWidget) {
-        const mainContentContainer = ParseUI({
-            type: "Container",
-            name: CatalogWidgetName.mainContentContainer(),
-            parent: parent,
-            anchor: mod.UIAnchor.TopCenter,
-            size: [LAYOUT.MAIN.CONTENT.WIDTH(), LAYOUT.MAIN.CONTENT.HEIGHT()],
-            position: [0, LAYOUT.MAIN.CONTENT.Y()],
-            ...DEBUG_BG([0, 1, 0]),
-        });
-
-        const mainContentInnerContainer = ParseUI({
-            type: "Container",
-            name: CatalogWidgetName.mainContentInnerContainer(),
-            parent: mainContentContainer,
-            anchor: mod.UIAnchor.TopCenter,
-            size: [LAYOUT.MAIN.CONTENT.INNER_WIDTH(), LAYOUT.MAIN.CONTENT.INNER_HEIGHT()],
-            position: [0, 0],
-            ...DEBUG_BG([0, 1, 0]),
-        });
-
-        this._mainPageContentContainer = mainContentInnerContainer;
     }
 
     private _createCloseButton(parent: mod.UIWidget, width: number) {
@@ -538,7 +534,7 @@ export class WeaponCatalog {
         this.close();
     }
 
-    public onUIButtonEvent(widget: mod.UIWidget, event: mod.UIButtonEvent) {
+    public onUIButtonEvent(widget: mod.UIWidget, _event: mod.UIButtonEvent) {
         const widgetName = mod.GetUIWidgetName(widget);
 
         if (parseCloseButton(widgetName)) {
@@ -549,11 +545,16 @@ export class WeaponCatalog {
         const category = parseNavButtonCategory(widgetName);
         if (category) {
             this.selectCategory(category);
+            return;
         }
 
         const weapon = parseWeaponWidgetName(widgetName);
         if (weapon) {
             this.onSelectWeapon(weapon);
+            // REMOVE ME
+            SHOULD_SHOW_BACK_BUTTON = !SHOULD_SHOW_BACK_BUTTON;
+            this._mainHeader?.showBackButton(SHOULD_SHOW_BACK_BUTTON);
+            return;
         }
     }
 }
