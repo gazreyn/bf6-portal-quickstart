@@ -10,6 +10,7 @@ import { MainHeader } from "./main-header";
 const DEBUG_LAYOUT = false;
 
 let SHOULD_SHOW_BACK_BUTTON = false;
+let SHOULD_SHOW_PAGINATION = false;
 
 const DEBUG_BG = (color: [number, number, number] = [1, 0, 0]) => {
     return DEBUG_LAYOUT ? {
@@ -553,7 +554,9 @@ export class WeaponCatalog {
             this.onSelectWeapon(weapon);
             // REMOVE ME
             SHOULD_SHOW_BACK_BUTTON = !SHOULD_SHOW_BACK_BUTTON;
-            this._mainHeader?.showBackButton(SHOULD_SHOW_BACK_BUTTON);
+            SHOULD_SHOW_PAGINATION = !SHOULD_SHOW_PAGINATION;
+            this._mainHeader?.setBackButtonVisibility(SHOULD_SHOW_BACK_BUTTON);
+            this._mainHeader?.setPaginationVisibility(SHOULD_SHOW_PAGINATION);
             return;
         }
     }
