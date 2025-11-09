@@ -1,8 +1,8 @@
-import { s } from "../../lib/string-macro";
-import { ParseUI } from "../../lib/parse-ui";
-import { CatalogWidgetName, LAYOUT } from "./utils";
-import { COLOR } from "../../lib/colors";
-import { stackLayout, type StackFrame } from "../../lib/stack-layout";
+import { s } from "../../../lib/string-macro";
+import { ParseUI } from "../../../lib/parse-ui";
+import { CatalogWidgetName, LAYOUT } from "../utils";
+import { COLOR } from "../../../lib/colors";
+import { stackLayout, type StackFrame } from "../../../lib/stack-layout";
 
 export type WeaponCatalogViewId = "weaponList" | "attachmentSlots" | "attachments";
 
@@ -186,9 +186,6 @@ export class MainHeader {
             return;
         }
 
-        console.log("MainHeader: Recalculating layout...");
-        console.log(`Back Button Visible: ${this.isBackButtonVisible}, Pagination Visible: ${this.isPaginationVisible}`);
-            
         const GAP = 12;
 
         // We'll use our stack layout utility to arrange the back button and title
@@ -204,8 +201,6 @@ export class MainHeader {
             gap: GAP,
             containerWidth: LAYOUT.MAIN.HEADER.INNER_WIDTH(),
         });
-
-        console.log(`Layout: ${JSON.stringify(layout)}`);
 
         const updateWidget = (widget: mod.UIWidget, frame: StackFrame) => {
             mod.SetUIWidgetPosition(widget, mod.CreateVector(frame.x, frame.y, 0));

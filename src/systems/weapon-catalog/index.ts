@@ -5,7 +5,9 @@ import { weaponCategories, weaponCategoryLabels, type WeaponCategory, type Weapo
 import { COLOR } from "../../lib/colors";
 import { parseCloseButton, parseNavButtonCategory, CatalogWidgetName, LAYOUT, parseWeaponWidgetName } from "./utils";
 import { s } from "../../lib/string-macro";
-import { MainHeader } from "./main-header";
+//
+import { MainHeader } from "./components/main-header";
+import { NavMenu } from "./components/nav-menu";
 
 const DEBUG_LAYOUT = false;
 
@@ -24,13 +26,13 @@ const DEBUG_BG = (color: [number, number, number] = [1, 0, 0]) => {
     };
 }
 
-type NavButton = {
-    category: WeaponCategory;
-    container: mod.UIWidget;
-    button: mod.UIWidget;
-    outline: mod.UIWidget;
-    label: mod.UIWidget;
-};
+// type NavButton = {
+//     category: WeaponCategory;
+//     container: mod.UIWidget;
+//     button: mod.UIWidget;
+//     outline: mod.UIWidget;
+//     label: mod.UIWidget;
+// };
 
 type WeaponButton = {
     id: string;
@@ -41,31 +43,31 @@ type WeaponButton = {
 };
 
 export class WeaponCatalog {
-    private _playerState: PlayerState;
-    private _isOpen: boolean = false;
+    private playerState: PlayerState;
+    private isOpen: boolean = false;
 
     // Widgets
-    private _catalogRootWidget: mod.UIWidget | undefined;
+    private catalogRootWidget: mod.UIWidget | undefined;
     // private _navigationHeaderTextWidget: mod.UIWidget | undefined;
-    private _navigationButtons: Partial<Record<WeaponCategory, NavButton>> = {};
+    // private navigationButtons: Partial<Record<WeaponCategory, NavButton>> = {};
     // private _mainHeader: Partial<{ container: mod.UIWidget; text: mod.UIWidget }> = {};
-    private _mainHeader: MainHeader | undefined;
-    private _mainPageContentContainer: mod.UIWidget | undefined;
+    private navMenu: NavMenu | undefined;
+    private mainHeader: MainHeader | undefined;
+    private mainPageContentContainer: mod.UIWidget | undefined;
 
     // Weapon Buttons
-    private _weaponButtons: Partial<Record<string, WeaponButton>> = {};
+    private weaponButtons: Partial<Record<string, WeaponButton>> = {};
 
     // State
-    private _currentView: "weaponList" | "attachmentSlots" | "attachments" = "weaponList";
-    private _selectedCategory: WeaponCategory = "assault";
+    private currentView: "weaponList" | "attachmentSlots" | "attachments" = "weaponList";
 
     constructor(playerState: PlayerState) {
-        this._playerState = playerState;
-        this._createCatalogUI();
+        this.playerState = playerState;
+        this.createCatalogUI();
         this.selectCategory("assault"); // Default selected category
     }
 
-    private _createCatalogUI() {
+    private createCatalogUI() {
         const catalogRoot = ParseUI({
             type: "Container",
             name: CatalogWidgetName.body(),
@@ -77,18 +79,18 @@ export class WeaponCatalog {
             bgFill: mod.UIBgFill.Solid,
             visible: false,
             depth: mod.UIDepth.AboveGameUI,
-            playerId: this._playerState.player,
+            playerId: this.playerState.player,
         });
 
         if (!catalogRoot) return;
 
-        this._catalogRootWidget = catalogRoot;
-        this._createCatalogBackground(catalogRoot);
-        this._createVerticalNavigationMenu(catalogRoot);
-        this._createMainContainer(catalogRoot);
+        this.catalogRootWidget = catalogRoot;
+        this.createCatalogBackground(catalogRoot);
+        this.createVerticalNavigationMenu(catalogRoot);
+        this.createMainContainer(catalogRoot);
     }
 
-    private _createCatalogBackground(catalogRoot: mod.UIWidget) {
+    private createCatalogBackground(catalogRoot: mod.UIWidget) {
         // Dimmed Background - We probably don't need to store these in a variable
         ParseUI({
             type: "Container",
@@ -115,12 +117,9 @@ export class WeaponCatalog {
         });
     }
 
-    private _createVerticalNavigationMenu(catalogRoot: mod.UIWidget) {
+    private createVerticalNavigationMenu(catalogRoot: mod.UIWidget) {
         const NAVIGATION_WIDTH = LAYOUT.NAVIGATION.WIDTH;
         const NAVIGATION_HEIGHT = LAYOUT.NAVIGATION.HEIGHT()
-        const NAVIGATION_INNER_WIDTH = LAYOUT.NAVIGATION.INNER_WIDTH();
-        const NAVIGATION_HEADER_INNER_HEIGHT = LAYOUT.NAVIGATION.HEADER.INNER_HEIGHT();
-        const NAVIGATION_HEADER_INNER_WIDTH = LAYOUT.NAVIGATION.HEADER.INNER_WIDTH();
 
         // Create the navigation menu container
         const navMenuWrapper = ParseUI({
@@ -136,135 +135,17 @@ export class WeaponCatalog {
 
         if (!navMenuWrapper) return; // Was unable to create nav menu wrapper?
 
-        // Create the navigation menu header - Consider moving this to its own function
-        const navMenuHeader = ParseUI({
-            type: "Container",
-            name: CatalogWidgetName.navMenuHeader(),
-            parent: navMenuWrapper,
-            size: [NAVIGATION_HEADER_INNER_WIDTH, NAVIGATION_HEADER_INNER_HEIGHT],
-            position: [LAYOUT.PADDING, LAYOUT.PADDING],
-            anchor: mod.UIAnchor.TopLeft,
-            ...DEBUG_BG(),
-        });
-
-        ParseUI({
-            type: "Text",
-            name: CatalogWidgetName.navMenuHeaderText(),
-            parent: navMenuHeader,
-            size: [NAVIGATION_HEADER_INNER_WIDTH, NAVIGATION_HEADER_INNER_HEIGHT],
-            padding: 0,
-            position: [0, 0],
-            anchor: mod.UIAnchor.Center,
-            textAnchor: mod.UIAnchor.BottomLeft,
-            textLabel: s`CATEGORY`,
-            ...DEBUG_BG(),
-        });
-
-        // if(navMenuHeaderText) this._navigationHeaderTextWidget = navMenuHeaderText;
-
-        const menuItems = Array.from(weaponCategories, (): StackItem => {
-            return {
-                size: { width: NAVIGATION_INNER_WIDTH, height: 65 },
-            };
-        });
-
-        // Calculate stack height and spacing
-        const verticalLayout = stackLayout(menuItems, {
-            direction: "vertical",
-            roundPixels: true,
-            gap: 8,
-            wrap: "nowrap",
-            containerHeight: "auto",
-            containerWidth: "auto"
-        });
-
-        const navMenuContainer = ParseUI({
-            type: "Container",
-            name: CatalogWidgetName.navMenuContainer(),
-            parent: navMenuWrapper,
-            anchor: mod.UIAnchor.TopCenter,
-            size: [verticalLayout.container.width, verticalLayout.container.height],
-            position: [0, LAYOUT.NAVIGATION.HEADER.HEIGHT()],
-            bgColor: [0, 0, 0],
-            bgAlpha: 0,
-            bgFill: mod.UIBgFill.Solid,
-        });
-
-        if (!navMenuContainer) return; // Was unable to create nav menu container?
-
-        weaponCategories.forEach((category, index) => {
-            const frame = verticalLayout.frames[index];
-            this._createNavButton(navMenuContainer, category, weaponCategoryLabels[category], frame);
-        });
-
-        this._createCloseButton(navMenuWrapper, NAVIGATION_INNER_WIDTH);
+        // Create the navigation menu
+        this.navMenu = new NavMenu(navMenuWrapper, weaponCategories.map((category) => ({
+            id: category,
+            label: weaponCategoryLabels[category],
+        })));
     }
 
-    private _createNavButton(parent: mod.UIWidget, category: WeaponCategory, textLabel: string | mod.Message, frame: StackFrame) {
-        const container = ParseUI({
-            type: "Container",
-            name: CatalogWidgetName.navButtonContainer(category),
-            parent,
-            position: [frame.x, frame.y],
-            size: [frame.width, frame.height],
-            bgFill: mod.UIBgFill.None,
-            bgColor: [0, 0, 0],
-            bgAlpha: 0,
-            anchor: mod.UIAnchor.TopLeft,
-        });
-
-        const button = ParseUI({
-            type: "Button",
-            name: CatalogWidgetName.navButton(category),
-            parent: container,
-            position: [0, 0],
-            size: [frame.width, frame.height],
-            bgFill: mod.UIBgFill.Solid,
-            bgColor: [1, 1, 1],
-            bgAlpha: 1,
-            buttonColorBase: COLOR.normalized("neutral-800"),
-            buttonAlphaBase: 0.7,
-            buttonColorHover: COLOR.normalized("neutral-600"),
-            buttonAlphaHover: 0.7,
-            buttonColorFocused: COLOR.normalized("neutral-700"),
-            buttonAlphaFocused: 0.7,
-            anchor: mod.UIAnchor.TopLeft,
-        });
-
-        const label = ParseUI({
-            type: "Text",
-            name: CatalogWidgetName.navButtonLabel(category),
-            parent: container,
-            padding: 24,
-            position: [0, 0],
-            size: [frame.width, frame.height],
-            anchor: mod.UIAnchor.TopLeft,
-            textAnchor: mod.UIAnchor.CenterLeft,
-            textLabel,
-        });
-
-        const outline = ParseUI({
-            type: "Container",
-            name: CatalogWidgetName.navButtonOutline(category),
-            parent: container,
-            position: [0, 0],
-            size: [frame.width, frame.height],
-            bgFill: mod.UIBgFill.OutlineThin,
-            bgColor: COLOR.normalized("neutral-200"),
-            bgAlpha: 1,
-            anchor: mod.UIAnchor.TopLeft,
-            visible: false,
-        });
-
-        if (!container || !button || !outline || !label) return; // Something within the button didn't create properly
-
-        this._navigationButtons[category] = { category, container, button, outline, label };
-    }
-
-    private _createMainContainer(catalogRoot: mod.UIWidget) {
+    private createMainContainer(catalogRoot: mod.UIWidget) {
         const MAIN_WIDTH = LAYOUT.MAIN.WIDTH;
         const MAIN_HEIGHT = LAYOUT.MAIN.HEIGHT();
-        const MAIN_HEADER_HEIGHT = LAYOUT.MAIN.HEADER.HEIGHT();
+        // const MAIN_HEADER_HEIGHT = LAYOUT.MAIN.HEADER.HEIGHT();
         // const MAIN_HEADER_WIDTH = LAYOUT.MAIN.HEADER.WIDTH();
 
         const mainWrapper = ParseUI({
@@ -280,17 +161,17 @@ export class WeaponCatalog {
         if (!mainWrapper) return; // Was unable to create nav menu wrapper?
 
         // Create the navigation menu header
-        this._mainHeader = new MainHeader(mainWrapper, "weaponList");
+        this.mainHeader = new MainHeader(mainWrapper, "weaponList");
 
         // TODO: Might want to store this on a class variable for later use
-        const mainContentContainer = this._createMainContentArea(mainWrapper);
+        const mainContentContainer = this.createMainContentArea(mainWrapper);
 
         if(!mainContentContainer) return;
 
-        this._createWeaponCategoryViews(mainContentContainer);
+        this.createWeaponCategoryViews(mainContentContainer);
     }
 
-    private _createMainContentArea(parent: mod.UIWidget) {
+    private createMainContentArea(parent: mod.UIWidget) {
         return ParseUI({
             type: "Container",
             name: CatalogWidgetName.mainContentContainer(),
@@ -303,13 +184,13 @@ export class WeaponCatalog {
         // this._mainPageContentContainer = mainContentInnerContainer;
     }
 
-    private _createWeaponCategoryViews(parent: mod.UIWidget) {
+    private createWeaponCategoryViews(parent: mod.UIWidget) {
         weaponCategories.forEach((category) => {
-            this._createViewForWeaponCategory(parent, category);
+            this.createViewForWeaponCategory(parent, category);
         });
     }
 
-    private _createViewForWeaponCategory(parent: mod.UIWidget, category: WeaponCategory) {
+    private createViewForWeaponCategory(parent: mod.UIWidget, category: WeaponCategory) {
        // The below container is essentially the page. 
         const viewContainer = ParseUI({
             type: "Container",
@@ -361,11 +242,11 @@ export class WeaponCatalog {
         for(let i = 0; i < itemCountPerPage; i++) {
             const weapon = fakeWeapons[i];
             const frame = gridLayout.frames[i];
-            this._createWeaponButton(viewContainer, weapon, frame);
+            this.createWeaponButton(viewContainer, weapon, frame);
         }
     }
 
-    private _createWeaponButton(parent: mod.UIWidget, weapon: WeaponDefinition, stackFrame: StackFrame) {
+    private createWeaponButton(parent: mod.UIWidget, weapon: WeaponDefinition, stackFrame: StackFrame) {
         const weaponItemButtonContainer = ParseUI({
             type: "Container",
             parent: parent,
@@ -426,108 +307,33 @@ export class WeaponCatalog {
 
         if(!weaponItemButton || !weaponItemButtonBorder || !weaponItemButtonText) return;
 
-        this._weaponButtons[weapon.id] = { id: weapon.id, container: weaponItemButtonContainer, button: weaponItemButton, border: weaponItemButtonBorder, label: weaponItemButtonText };
-    }
-
-    private _createCloseButton(parent: mod.UIWidget, width: number) {
-        ParseUI({
-            type: "Container",
-            name: CatalogWidgetName.closeButtonContainer(),
-            parent,
-            position: [0, LAYOUT.PADDING],
-            size: [width, 65],
-            bgFill: mod.UIBgFill.None,
-            anchor: mod.UIAnchor.BottomCenter,
-            children: [
-                {
-                    type: "Button",
-                    name: CatalogWidgetName.closeButton(),
-                    parent,
-                    anchor: mod.UIAnchor.TopLeft,
-                    position: [0, 0],
-                    size: [width, 65],
-                    bgFill: mod.UIBgFill.Solid,
-                    bgColor: [1, 1, 1],
-                    bgAlpha: 1,
-                    buttonColorBase: COLOR.normalized("neutral-600"),
-                    buttonAlphaBase: 1,
-                    buttonColorHover: COLOR.normalized("neutral-400"),
-                    buttonAlphaHover: 1,
-                    buttonColorFocused: COLOR.normalized("neutral-500"),
-                    buttonAlphaFocused: 1,
-                },
-                {
-                    type: "Container",
-                    name: "closeButtonOutline",
-                    parent,
-                    anchor: mod.UIAnchor.TopLeft,
-                    position: [0, 0],
-                    size: [width, 65],
-                    bgFill: mod.UIBgFill.OutlineThin,
-                    bgColor: COLOR.normalized("neutral-200"),
-                    bgAlpha: 1,
-                },
-                {
-                    type: "Text",
-                    name: CatalogWidgetName.closeButtonText(),
-                    parent,
-                    anchor: mod.UIAnchor.TopLeft,
-                    position: [0, 0],
-                    size: [width, 65],
-                    textLabel: s`CLOSE`,
-                    textAnchor: mod.UIAnchor.CenterLeft,
-                    padding: 24,
-                }
-            ]
-        });
+        this.weaponButtons[weapon.id] = { id: weapon.id, container: weaponItemButtonContainer, button: weaponItemButton, border: weaponItemButtonBorder, label: weaponItemButtonText };
     }
 
     public selectCategory(category: WeaponCategory) {
-        // Maybe we don't need this check, but it could prevent unnecessary UI updates
-        // if (this._selectedCategory === category) return;
-
-        const previousCategory = this._selectedCategory;
-        const previousButton = this._navigationButtons[previousCategory];
-
-        if (previousButton) {
-            this._setNavButtonSelected(previousButton, false);
-        }
-
-        const nextButton = this._navigationButtons[category];
-        if (!nextButton) return;
-        this._setNavButtonSelected(nextButton, true);
-        this._selectedCategory = category;
+        if(!this.navMenu) return;
+        this.navMenu.selectItem(category);
     }
 
-    private _setNavButtonSelected(button: NavButton, selected: boolean) {
-        if (selected) {
-            mod.SetUIWidgetVisible(button.outline, true);
-            mod.SetUIButtonColorBase(button.button, COLOR.vector("neutral-600"));
-        } else {
-            mod.SetUIWidgetVisible(button.outline, false);
-            mod.SetUIButtonColorBase(button.button, COLOR.vector("neutral-800"));
-        }
-    }
-
-    private onSelectWeapon(weaponId: string) {
+    private selectWeapon(weaponId: string) {
         console.log(`Selected weapon: ${weaponId}`);
     }
 
     public open() {
-        if (!this._catalogRootWidget) return;
+        if (!this.catalogRootWidget) return;
 
-        mod.EnableUIInputMode(true, this._playerState.player);
-        mod.SetUIWidgetVisible(this._catalogRootWidget, true);
-        this._isOpen = true;
+        mod.EnableUIInputMode(true, this.playerState.player);
+        mod.SetUIWidgetVisible(this.catalogRootWidget, true);
+        this.isOpen = true;
         // Logic to display the weapon catalog UI
     }
 
     public close() {
-        this._isOpen = false;
-        if (!this._catalogRootWidget) return;
+        this.isOpen = false;
+        if (!this.catalogRootWidget) return;
 
-        mod.EnableUIInputMode(false, this._playerState.player);
-        mod.SetUIWidgetVisible(this._catalogRootWidget, false);
+        mod.EnableUIInputMode(false, this.playerState.player);
+        mod.SetUIWidgetVisible(this.catalogRootWidget, false);
     }
 
     public destroy() {
@@ -551,12 +357,12 @@ export class WeaponCatalog {
 
         const weapon = parseWeaponWidgetName(widgetName);
         if (weapon) {
-            this.onSelectWeapon(weapon);
+            this.selectWeapon(weapon);
             // REMOVE ME
-            SHOULD_SHOW_BACK_BUTTON = !SHOULD_SHOW_BACK_BUTTON;
-            SHOULD_SHOW_PAGINATION = !SHOULD_SHOW_PAGINATION;
-            this._mainHeader?.setBackButtonVisibility(SHOULD_SHOW_BACK_BUTTON);
-            this._mainHeader?.setPaginationVisibility(SHOULD_SHOW_PAGINATION);
+            // SHOULD_SHOW_BACK_BUTTON = !SHOULD_SHOW_BACK_BUTTON;
+            // SHOULD_SHOW_PAGINATION = !SHOULD_SHOW_PAGINATION;
+            // this._mainHeader?.setBackButtonVisibility(SHOULD_SHOW_BACK_BUTTON);
+            // this._mainHeader?.setPaginationVisibility(SHOULD_SHOW_PAGINATION);
             return;
         }
     }
