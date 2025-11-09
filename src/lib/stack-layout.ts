@@ -19,7 +19,7 @@ type StackLayoutOptions = {
 };
 
 export type StackFrame<T = string> = { id?: T; x: number; y: number; width: number; height: number };
-type StackLayoutResult<T = string> = { container: Size; frames: StackFrame<T>[]; maxItemsFit: number };
+export type StackLayoutResult<T = string> = { container: Size; frames: StackFrame<T>[]; maxItemsFit: number };
 
 export function stackLayout<T = string>(items: StackItem<T>[], opts: StackLayoutOptions = {}): StackLayoutResult<T> {
   const {
