@@ -47,13 +47,14 @@ export class WeaponCatalog {
     private isOpen: boolean = false;
 
     // Widgets
-    private catalogRootWidget: mod.UIWidget | undefined;
+    private catalogRootWidget: mod.UIWidget;
     // private _navigationHeaderTextWidget: mod.UIWidget | undefined;
     // private navigationButtons: Partial<Record<WeaponCategory, NavButton>> = {};
     // private _mainHeader: Partial<{ container: mod.UIWidget; text: mod.UIWidget }> = {};
-    private navMenu: NavMenu | undefined;
-    private mainHeader: MainHeader | undefined;
-    private mainPageContentContainer: mod.UIWidget | undefined;
+    private navMenu: NavMenu;
+    private mainContainer: mod.UIWidget;
+    private mainHeader: MainHeader;
+    private mainViewContainer: mod.UIWidget;
 
     // Weapon Buttons
     private weaponButtons: Partial<Record<string, WeaponButton>> = {};
@@ -63,11 +64,19 @@ export class WeaponCatalog {
 
     constructor(playerState: PlayerState) {
         this.playerState = playerState;
-        this.createCatalogUI();
+        //
+        this.catalogRootWidget = this.createCatalogRootWidget() ?? (() => { throw new Error("Failed to create weapon catalog root widget"); })();
+        this.createCatalogBackground(this.catalogRootWidget);
+        this.navMenu = this.createVerticalNavigationMenu(this.catalogRootWidget) ?? (() => { throw new Error("Failed to create navigation menu"); })();
+        this.mainContainer = this.createMainContainer(this.catalogRootWidget) ?? (() => { throw new Error("Failed to create main container"); })();
+        this.mainHeader = new MainHeader(this.mainContainer, "weaponList");
+        this.mainViewContainer = this.createMainContentArea(this.mainContainer) ?? (() => { throw new Error("Failed to create main content area"); })();
+        this.createWeaponCategoryViews(this.mainViewContainer);
+        //
         this.selectCategory("assault"); // Default selected category
     }
 
-    private createCatalogUI() {
+    private createCatalogRootWidget() {
         const catalogRoot = ParseUI({
             type: "Container",
             name: CatalogWidgetName.body(),
@@ -82,12 +91,7 @@ export class WeaponCatalog {
             playerId: this.playerState.player,
         });
 
-        if (!catalogRoot) return;
-
-        this.catalogRootWidget = catalogRoot;
-        this.createCatalogBackground(catalogRoot);
-        this.createVerticalNavigationMenu(catalogRoot);
-        this.createMainContainer(catalogRoot);
+        return catalogRoot;
     }
 
     private createCatalogBackground(catalogRoot: mod.UIWidget) {
@@ -136,7 +140,7 @@ export class WeaponCatalog {
         if (!navMenuWrapper) return; // Was unable to create nav menu wrapper?
 
         // Create the navigation menu
-        this.navMenu = new NavMenu(navMenuWrapper, weaponCategories.map((category) => ({
+        return new NavMenu(navMenuWrapper, weaponCategories.map((category) => ({
             id: category,
             label: weaponCategoryLabels[category],
         })));
@@ -145,10 +149,8 @@ export class WeaponCatalog {
     private createMainContainer(catalogRoot: mod.UIWidget) {
         const MAIN_WIDTH = LAYOUT.MAIN.WIDTH;
         const MAIN_HEIGHT = LAYOUT.MAIN.HEIGHT();
-        // const MAIN_HEADER_HEIGHT = LAYOUT.MAIN.HEADER.HEIGHT();
-        // const MAIN_HEADER_WIDTH = LAYOUT.MAIN.HEADER.WIDTH();
 
-        const mainWrapper = ParseUI({
+        return ParseUI({
             type: "Container",
             name: CatalogWidgetName.mainWrapper(),
             parent: catalogRoot,
@@ -157,18 +159,6 @@ export class WeaponCatalog {
             anchor: mod.UIAnchor.TopLeft,
             ...DEBUG_BG([0, 0, 1]),
         });
-
-        if (!mainWrapper) return; // Was unable to create nav menu wrapper?
-
-        // Create the navigation menu header
-        this.mainHeader = new MainHeader(mainWrapper, "weaponList");
-
-        // TODO: Might want to store this on a class variable for later use
-        const mainContentContainer = this.createMainContentArea(mainWrapper);
-
-        if(!mainContentContainer) return;
-
-        this.createWeaponCategoryViews(mainContentContainer);
     }
 
     private createMainContentArea(parent: mod.UIWidget) {
@@ -181,7 +171,6 @@ export class WeaponCatalog {
             position: [0, LAYOUT.MAIN.CONTENT.Y()],
             ...DEBUG_BG([0, 1, 0]),
         });
-        // this._mainPageContentContainer = mainContentInnerContainer;
     }
 
     private createWeaponCategoryViews(parent: mod.UIWidget) {
